@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="800" height="240" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370 110">
+<rect x="0" y="0" width="370" height="110" rx="11" ry="11" fill="#000000"/>
+<circle cx="55" cy="55" r="32" fill="none" stroke="#FFFFFF" stroke-width="7"/>
+<path d="M44,36 L44,74 L76,55 Z" fill="#FFFFFF"/>
+<text x="234" y="71" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="bold" font-size="46" fill="#FFFFFF">STRM</text>
+</svg>

@@ -1,0 +1,28 @@
+name: "TagTurbo"
+guid: "f4a2e8c1-9b3d-4f7a-b6c5-2d8e1a3f9b04"
+version: "1.0.0.0"
+targetAbi: "10.10.0.0"
+framework: "net9.0"
+owner: "TagTurbo"
+overview: "Adds quality badges (4K, 1080p, etc.) to media posters and thumbnails."
+description: |
+  TagTurbo automatically adds quality resolution badges to your media posters and thumbnails.
+  Badges are visible on all clients including web, mobile, TV, and Kodi.
+
+  Features:
+  - Automatic quality detection based on video resolution
+  - Configurable badge position (corners)
+  - Configurable badge size
+  - Image caching for performance
+  - Support for 4K, 1080p, 720p, and SD badges
+
+category: "General"
+artifacts:
+  - "Jellyfin.Plugin.TagTurbo.dll"
+changelog: |
+  ## v1.0.0.0
+  - Initial release
+  - Quality detection for 4K, 1080p, 720p, SD
+  - Configurable badge position and size
+  - Image caching
+  - HTTP middleware for universal client support

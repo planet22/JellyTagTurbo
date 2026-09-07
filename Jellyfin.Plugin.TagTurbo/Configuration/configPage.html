@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TagTurbo</title>
+</head>
+<body>
+    <div id="TagTurboConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <style>
+            #TagTurboConfigPage {
+                /* Sourced from Jellyfin's own active theme (--jf-palette-* is set by jellyfin-web's
+                   MUI theming per the theme chosen in Settings > Display); the values after each
+                   comma are fallbacks for older servers that don't expose these variables. */
+                --jt-bg: var(--jf-palette-background-default, #1c1624);
+                --jt-surface: var(--jf-palette-background-paper, #251d2e);
+                --jt-text: var(--jf-palette-text-primary, #f1ecf7);
+                --jt-text-muted: var(--jf-palette-text-secondary, #b6a5c6);
+                --jt-text-faint: color-mix(in srgb, var(--jt-text-muted) 65%, transparent);
+                --jt-border: var(--jf-palette-divider, #453a54);
+                --jt-border-soft: color-mix(in srgb, var(--jt-border) 70%, transparent);
+                --jt-surface-alt: color-mix(in srgb, var(--jt-surface) 88%, var(--jt-text) 12%);
+                --jt-row: color-mix(in srgb, var(--jt-surface) 94%, var(--jt-text) 6%);
+                --jt-accent: var(--jf-palette-primary-main, #c084e0);
+                --jt-accent-strong: var(--jf-palette-primary-light, color-mix(in srgb, var(--jt-accent) 80%, white));
+                --jt-accent-soft: color-mix(in srgb, var(--jt-accent) 20%, var(--jt-surface));
+                --jt-accent-contrast: var(--jf-palette-primary-contrastText, #241436);
+                --jt-accent2: var(--jf-palette-secondary-main, #4fc3ec);
+                --jt-accent2-soft: color-mix(in srgb, var(--jt-accent2) 18%, var(--jt-surface));
+                --jt-danger: var(--jf-palette-error-main, #e88ba8);
+                --jt-danger-soft: color-mix(in srgb, var(--jt-danger) 18%, var(--jt-surface));
+                --jt-radius-lg: 18px;
+                --jt-radius-md: 13px;
+                --jt-radius-sm: 9px;
+                --jt-radius-pill: 999px;
+                --jt-shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.45);
+                font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+            }
+            #TagTurboConfigPage .jt-shell * { box-sizing: border-box; }
+            #TagTurboConfigPage .jt-shell {
+                display: grid;
+                grid-template-columns: 236px minmax(0,1fr) 312px;
+                background: var(--jt-bg);
+                color: var(--jt-text);
+                border-radius: var(--jt-radius-lg);
+                overflow: hidden;
+                border: 1px solid var(--jt-border-soft);
+                min-height: 640px;
+            }
+            #TagTurboConfigPage .jt-shell form { display: contents; }
+            #TagTurboConfigPage h1, #TagTurboConfigPage h2, #TagTurboConfigPage h3 { font-family: inherit; margin: 0; color: var(--jt-text); }
+            #TagTurboConfigPage .mono { font-family: "Consolas","SFMono-Regular",ui-monospace,monospace; }
+
+            /* ---- Rail ---- */
+            #TagTurboConfigPage .jt-rail { background: var(--jt-surface); border-right: 1px solid var(--jt-border-soft); padding: 16px 12px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+            #TagTurboConfigPage .jt-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 2px; }
+            #TagTurboConfigPage .jt-brand-mark { width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(155deg, var(--jt-accent), var(--jt-accent-strong)); color: var(--jt-accent-contrast); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+            #TagTurboConfigPage .jt-brand-mark svg { width: 17px; height: 17px; }
+            #TagTurboConfigPage .jt-brand-name { font-weight: 700; font-size: 16px; color: var(--jt-accent-strong); }
+            #TagTurboConfigPage .jt-brand-sub { font-size: 10.5px; color: var(--jt-text-faint); font-weight: 600; }
+            #TagTurboConfigPage .jt-nav-label { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--jt-text-faint); padding: 2px 10px 4px; }
+            #TagTurboConfigPage .jt-nav-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+            #TagTurboConfigPage .jt-nav-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 11px; border: 0; border-radius: var(--jt-radius-pill); background: var(--jt-row); color: var(--jt-text-muted); text-align: left; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+            #TagTurboConfigPage .jt-nav-item:hover { background: var(--jt-surface-alt); color: var(--jt-text); }
+            #TagTurboConfigPage .jt-nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+            #TagTurboConfigPage .jt-nav-item .lbl { flex: 1; }
+            #TagTurboConfigPage .jt-nav-item.active { background: var(--jt-accent); color: var(--jt-accent-contrast); }
+            #TagTurboConfigPage .jt-rail-footer { margin-top: auto; border-top: 1px solid var(--jt-border-soft); padding-top: 10px; display: flex; flex-direction: column; gap: 3px; }
+            #TagTurboConfigPage .jt-rail-footer-row { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--jt-text-faint); font-weight: 600; padding: 0 4px; }
+
+            /* ---- Main ---- */
+            #TagTurboConfigPage .jt-main { min-width: 0; display: flex; flex-direction: column; max-height: 82vh; overflow-y: auto; }
+            #TagTurboConfigPage .jt-topbar { display: flex; align-items: center; gap: 14px; padding: 16px 24px 0; }
+            #TagTurboConfigPage .jt-topbar-title h1 { font-size: 19px; font-weight: 700; }
+            #TagTurboConfigPage .jt-topbar-title p { margin: 2px 0 0; font-size: 11.5px; color: var(--jt-text-muted); }
+            #TagTurboConfigPage .jt-topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+            #TagTurboConfigPage .jt-switch { position: relative; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+            #TagTurboConfigPage .jt-switch input { position: absolute; opacity: 0; width: 36px; height: 20px; margin: 0; cursor: pointer; }
+            #TagTurboConfigPage .jt-switch .track { width: 36px; height: 20px; border-radius: var(--jt-radius-pill); background: var(--jt-row); border: 1px solid var(--jt-border); position: relative; flex-shrink: 0; transition: background .12s; }
+            #TagTurboConfigPage .jt-switch .track::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--jt-text-faint); transition: transform .12s, background .12s; }
+            #TagTurboConfigPage .jt-switch input:checked + .track { background: var(--jt-accent); border-color: var(--jt-accent); }
+            #TagTurboConfigPage .jt-switch input:checked + .track::after { transform: translateX(16px); background: #fff; }
+            #TagTurboConfigPage .jt-switch .lbl { font-size: 12px; font-weight: 700; }
+
+            #TagTurboConfigPage .jt-btn { display: inline-flex; align-items: center; gap: 6px; border-radius: var(--jt-radius-pill); border: 1.5px solid var(--jt-border); background: var(--jt-surface); color: var(--jt-text); padding: 7px 15px; font-size: 12px; font-weight: 700; cursor: pointer; }
+            #TagTurboConfigPage .jt-btn:hover { border-color: var(--jt-accent); color: var(--jt-accent-strong); }
+            #TagTurboConfigPage .jt-btn.primary { background: var(--jt-accent); border-color: var(--jt-accent); color: var(--jt-accent-contrast); }
+            #TagTurboConfigPage .jt-btn.primary:hover { background: var(--jt-accent-strong); border-color: var(--jt-accent-strong); }
+            #TagTurboConfigPage .jt-btn.danger { border-color: var(--jt-danger); color: var(--jt-danger); }
+            #TagTurboConfigPage .jt-btn svg { width: 13px; height: 13px; }
+
+            #TagTurboConfigPage .jt-tabbar { display: flex; gap: 22px; padding: 16px 24px 0; border-bottom: 1px solid var(--jt-border-soft); margin-top: 12px; }
+            #TagTurboConfigPage .jt-tab { border: 0; background: transparent; padding: 9px 2px; font-size: 13.5px; font-weight: 700; color: var(--jt-text-faint); border-bottom: 2.5px solid transparent; margin-bottom: -1px; cursor: pointer; }
+            #TagTurboConfigPage .jt-tab.active { color: var(--jt-accent-strong); border-color: var(--jt-accent); }
+
+            #TagTurboConfigPage .jt-tab-header { margin: 16px 24px 0; }
+            #TagTurboConfigPage .jt-banner { padding: 12px 16px; border-radius: var(--jt-radius-md); background: var(--jt-accent2-soft); border: 1px solid color-mix(in srgb, var(--jt-accent2) 35%, transparent); display: flex; align-items: center; gap: 12px; font-size: 12px; }
+            #TagTurboConfigPage .jt-banner svg { width: 16px; height: 16px; color: var(--jt-accent2); flex-shrink: 0; }
+            #TagTurboConfigPage .jt-banner .spacer { flex: 1; }
+            #TagTurboConfigPage .jt-linkbtn { border: 0; background: transparent; color: var(--jt-accent2); font-weight: 700; font-size: 11.5px; text-decoration: underline; cursor: pointer; }
+
+            #TagTurboConfigPage .jt-pagewrap { padding: 18px 24px 40px; }
+            #TagTurboConfigPage .jt-page { display: none; }
+            #TagTurboConfigPage .jt-system-page { display: none; }
+
+            #TagTurboConfigPage .jt-card { background: var(--jt-surface); border: 1px solid var(--jt-border-soft); border-radius: var(--jt-radius-lg); box-shadow: var(--jt-shadow); padding: 16px 18px; margin-bottom: 14px; }
+            #TagTurboConfigPage .jt-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            #TagTurboConfigPage .jt-card-head h2 { font-size: 13px; font-weight: 700; }
+            #TagTurboConfigPage .jt-card-head .hint { font-size: 11px; color: var(--jt-text-faint); font-weight: 600; }
+            #TagTurboConfigPage .jt-field-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 11px 0; border-top: 1px solid var(--jt-border-soft); }
+            #TagTurboConfigPage .jt-field-row:first-child { border-top: 0; padding-top: 0; }
+            #TagTurboConfigPage .jt-field-label { font-size: 11px; color: var(--jt-text-faint); font-weight: 700; margin-bottom: 6px; }
+            #TagTurboConfigPage .jt-field { display: flex; flex-direction: column; }
+
+            #TagTurboConfigPage .jt-hidden-field { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+            #TagTurboConfigPage .hidden { display: none !important; }
+
+            #TagTurboConfigPage .jt-corner-picker { display: grid; grid-template-columns: repeat(2,30px); grid-template-rows: repeat(2,30px); gap: 4px; padding: 6px; background: var(--jt-row); border: 1px solid var(--jt-border-soft); border-radius: 13px; }
+            #TagTurboConfigPage .jt-corner-picker button { border: 1.5px solid var(--jt-border); border-radius: 7px; background: var(--jt-surface); position: relative; cursor: pointer; }
+            #TagTurboConfigPage .jt-corner-picker button::after { content:''; position:absolute; width:8px; height:8px; border-radius:50%; background: var(--jt-text-faint); }
+            #TagTurboConfigPage .jt-corner-picker button[data-val="TopLeft"]::after { top:4px; left:4px; }
+            #TagTurboConfigPage .jt-corner-picker button[data-val="TopRight"]::after { top:4px; right:4px; }
+            #TagTurboConfigPage .jt-corner-picker button[data-val="BottomLeft"]::after { bottom:4px; left:4px; }
+            #TagTurboConfigPage .jt-corner-picker button[data-val="BottomRight"]::after { bottom:4px; right:4px; }
+            #TagTurboConfigPage .jt-corner-picker button.active { border-color: var(--jt-accent); background: var(--jt-accent-soft); }
+            #TagTurboConfigPage .jt-corner-picker button.active::after { background: var(--jt-accent); }
+
+            #TagTurboConfigPage .jt-segmented { display: inline-flex; background: var(--jt-row); border: 1px solid var(--jt-border-soft); border-radius: var(--jt-radius-pill); padding: 3px; }
+            #TagTurboConfigPage .jt-segmented button { border: 0; background: transparent; padding: 6px 13px; border-radius: var(--jt-radius-pill); font-size: 11.5px; font-weight: 700; color: var(--jt-text-muted); cursor: pointer; }
+            #TagTurboConfigPage .jt-segmented button.active { background: var(--jt-accent); color: var(--jt-accent-contrast); }
+
+            #TagTurboConfigPage .jt-sliders-row { display: flex; gap: 22px; padding: 12px 0; border-top: 1px solid var(--jt-border-soft); flex-wrap: wrap; }
+            #TagTurboConfigPage .jt-slider-field { display: flex; flex-direction: column; gap: 6px; min-width: 150px; flex: 1; }
+            #TagTurboConfigPage .jt-slider-head { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; }
+            #TagTurboConfigPage .jt-slider-head .val { color: var(--jt-accent-strong); font-weight: 500; cursor: pointer; border-bottom: 1px dashed transparent; }
+            #TagTurboConfigPage .jt-slider-head .val:hover { border-bottom-color: var(--jt-accent); }
+            #TagTurboConfigPage .jt-val-edit { width: 52px; background: var(--jt-row); border: 1px solid var(--jt-accent); border-radius: 5px; color: var(--jt-accent-strong); font: inherit; font-family: inherit; padding: 0 4px; text-align: right; -moz-appearance: textfield; }
+            #TagTurboConfigPage .jt-val-edit::-webkit-outer-spin-button, #TagTurboConfigPage .jt-val-edit::-webkit-inner-spin-button { margin-left: 4px; }
+            #TagTurboConfigPage .jt-slider-field input[type="range"] { -webkit-appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--jt-row); border: 1px solid var(--jt-border-soft); }
+            #TagTurboConfigPage .jt-slider-field input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--jt-accent); border: 2.5px solid var(--jt-surface); box-shadow: 0 0 0 1px var(--jt-accent); margin-top: -6px; cursor: pointer; }
+            #TagTurboConfigPage .jt-slider-field input[type="range"]::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--jt-accent); border: 2.5px solid var(--jt-surface); box-shadow: 0 0 0 1px var(--jt-accent); cursor: pointer; }
+
+            #TagTurboConfigPage .jt-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+            #TagTurboConfigPage .jt-chip { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--jt-border); border-radius: var(--jt-radius-pill); padding: 6px 12px 6px 7px; background: var(--jt-row); font-size: 12px; font-weight: 700; cursor: pointer; position: relative; }
+            #TagTurboConfigPage .jt-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+            #TagTurboConfigPage .jt-chip .dot { width: 17px; height: 17px; border-radius: 50%; background: var(--jt-surface); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: var(--jt-text-faint); flex-shrink: 0; }
+            #TagTurboConfigPage .jt-chip:has(input:checked) { border-color: var(--jt-accent); background: var(--jt-accent); color: var(--jt-accent-contrast); }
+            #TagTurboConfigPage .jt-chip:has(input:checked) .dot { background: rgba(255,255,255,.3); color: inherit; }
+            #TagTurboConfigPage .jt-chip:has(input:focus-visible) { outline: 2px solid var(--jt-accent); outline-offset: 1px; }
+
+            #TagTurboConfigPage .jt-select { background: var(--jt-row); border: 1px solid var(--jt-border); border-radius: var(--jt-radius-pill); padding: 7px 30px 7px 13px; font-size: 12px; font-weight: 600; color: var(--jt-text); appearance: none; -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b6a5c6' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position: right 10px center; background-size: 12px; }
+
+            #TagTurboConfigPage .jt-input, #TagTurboConfigPage .jt-input-num { background: var(--jt-row); border: 1px solid var(--jt-border); border-radius: var(--jt-radius-sm); padding: 7px 10px; font-size: 12px; color: var(--jt-text); }
+            #TagTurboConfigPage .jt-input-num { width: 64px; }
+            #TagTurboConfigPage .jt-swatch-input { position: relative; width: 28px; height: 28px; border-radius: 9px; overflow: hidden; border: 1px solid var(--jt-border); flex-shrink: 0; }
+            #TagTurboConfigPage .jt-swatch-input input[type="color"] { position: absolute; inset: -4px; border: 0; padding: 0; width: 38px; height: 38px; cursor: pointer; background: none; }
+            #TagTurboConfigPage .jt-color-field { display: flex; align-items: center; gap: 9px; }
+
+            #TagTurboConfigPage .jt-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1em; }
+            #TagTurboConfigPage .jt-cbt-item { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+            #TagTurboConfigPage .jt-cbt-item label { font-size: 11px; color: var(--jt-text-faint); font-weight: 700; }
+            #TagTurboConfigPage .jt-lib-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+            #TagTurboConfigPage .jt-lib-chip { display: flex; align-items: center; gap: 7px; border: 1px solid var(--jt-border); border-radius: var(--jt-radius-pill); padding: 7px 12px; font-size: 12px; font-weight: 600; }
+            #TagTurboConfigPage .jt-lib-chip input { accent-color: var(--jt-accent); }
+
+            #TagTurboConfigPage .jt-order-arrows { display: flex; gap: 4px; margin-left: auto; }
+            #TagTurboConfigPage .jt-order-arrows button { width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--jt-border); background: var(--jt-row); color: var(--jt-text-muted); cursor: pointer; font-size: 10px; }
+            #TagTurboConfigPage .jt-order-arrows button:disabled { opacity: .3; cursor: default; }
+
+            #TagTurboConfigPage .badge-card { display:flex; flex-direction:column; align-items:center; border:1px solid var(--jt-border); border-radius: var(--jt-radius-md); padding:.6em; cursor:pointer; position:relative; background: var(--jt-row); }
+            #TagTurboConfigPage .badge-card:hover { border-color: var(--jt-accent); }
+            #TagTurboConfigPage .badge-card.custom { border-color: #57c07d; }
+            #TagTurboConfigPage .badge-card img { width:80px; height:80px; object-fit:contain; }
+            #TagTurboConfigPage .badge-card .badge-label { margin-top:.4em; font-size:.85em; text-align:center; }
+            #TagTurboConfigPage .badge-card .badge-reset { position:absolute; top:4px; right:4px; background: var(--jt-danger); color:#241436; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; line-height:20px; text-align:center; cursor:pointer; display:none; padding:0; font-weight:800; }
+            #TagTurboConfigPage .badge-card.custom .badge-reset { display:block; }
+
+            /* ---- Preview column ---- */
+            #TagTurboConfigPage .jt-preview { border-left: 1px solid var(--jt-border-soft); background: var(--jt-surface); padding: 18px 16px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+            #TagTurboConfigPage .jt-preview-head { display: flex; align-items: center; justify-content: space-between; }
+            #TagTurboConfigPage .jt-preview-head h3 { font-size: 12.5px; font-weight: 700; }
+            #TagTurboConfigPage .jt-live-dot { width:6px; height:6px; border-radius:50%; background: var(--jt-accent2); display:inline-block; margin-right:6px; box-shadow: 0 0 0 3px var(--jt-accent2-soft); }
+            #TagTurboConfigPage .preview-search-wrap { position: relative; }
+            #TagTurboConfigPage .preview-search-wrap input { width: 100%; box-sizing: border-box; }
+            #TagTurboConfigPage .preview-search-results { position:absolute; top:100%; left:0; right:0; z-index:100; background: var(--jt-row); border:1px solid var(--jt-border); border-radius: var(--jt-radius-md); max-height:220px; overflow-y:auto; display:none; margin-top: 4px; }
+            #TagTurboConfigPage .preview-search-results .preview-search-item { padding:.5em .8em; cursor:pointer; font-size:.85em; }
+            #TagTurboConfigPage .preview-search-results .preview-search-item:hover { background: var(--jt-accent-soft); }
+            #TagTurboConfigPage .preview-selected { font-size:.8em; color: var(--jt-text-faint); font-weight: 600; }
+            #TagTurboConfigPage .preview-img { width:100%; border-radius: var(--jt-radius-md); display:none; border: 1px solid var(--jt-border-soft); }
+            #TagTurboConfigPage .preview-img.poster { aspect-ratio:2/3; object-fit:cover; }
+            #TagTurboConfigPage .preview-img.thumb { aspect-ratio:16/9; object-fit:cover; }
+            #TagTurboConfigPage .preview-spinner { display:none; text-align:center; color: var(--jt-text-faint); padding:.5em 0; font-size:.85em; }
+            #TagTurboConfigPage .preview-error { display:none; color: var(--jt-danger); font-size:.8em; margin-top:.4em; }
+            #TagTurboConfigPage .jt-stat-card { border:1px solid var(--jt-border-soft); border-radius: var(--jt-radius-md); padding:11px 13px; background: var(--jt-row); font-size: 11px; }
+            #TagTurboConfigPage .jt-stat-row { display:flex; justify-content:space-between; padding:3px 0; color: var(--jt-text-muted); font-weight:600; }
+
+            @media (max-width: 1220px) {
+                #TagTurboConfigPage .jt-shell { grid-template-columns: 210px 1fr; }
+                #TagTurboConfigPage .jt-preview { display: none; }
+            }
+        </style>
+        <div data-role="content">
+            <div class="content-primary">
+                <div class="jt-shell">
+                <form id="TagTurboConfigForm">
+                    <!-- ================= RAIL ================= -->
+                    <nav class="jt-rail">
+                        <div class="jt-brand">
+                            <div class="jt-brand-mark">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="M3 7l9 5 9-5"></path><path d="M12 12v10"></path></svg>
+                            </div>
+                            <div>
+                                <div class="jt-brand-name">TagTurbo</div>
+                                <div class="jt-brand-sub">Badge Studio</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="jt-nav-label">Badge categories</div>
+                            <ul class="jt-nav-list" id="RailBadges"></ul>
+                        </div>
+                        <div>
+                            <div class="jt-nav-label">General</div>
+                            <ul class="jt-nav-list" id="RailSystem"></ul>
+                        </div>
+
+                        <div class="jt-rail-footer">
+                            <div class="jt-rail-footer-row"><span>Version</span><span class="mono">3.0.0.5</span></div>
+                            <div class="jt-rail-footer-row"><span>Cache</span><span class="mono" id="RailCacheStat">—</span></div>
+                        </div>
+                    </nav>
+
+                    <!-- ================= MAIN ================= -->
+                    <div class="jt-main">
+                        <div class="jt-topbar">
+                            <div class="jt-topbar-title">
+                                <h1 id="JtPageTitle">Resolution</h1>
+                                <p id="JtPageSub">4K, 1080p, 720p and SD badges.</p>
+                            </div>
+                            <div class="jt-topbar-actions">
+                                <label class="jt-switch" title="Master switch for all badge generation">
+                                    <input id="Enabled" type="checkbox" />
+                                    <span class="track"></span>
+                                    <span class="lbl">TagTurbo Enabled</span>
+                                </label>
+                                <button type="submit" class="jt-btn primary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="jt-tabbar" id="JtTabbar">
+                            <button type="button" class="jt-tab active" id="TabPoster" data-tab="Poster">Poster</button>
+                            <button type="button" class="jt-tab" id="TabThumb" data-tab="Thumb">Thumbnail</button>
+                        </div>
+
+                        <div class="jt-tab-header" id="PosterTabHeader">
+                            <label class="jt-switch"><input id="PosterEnabled" type="checkbox" /><span class="track"></span><span class="lbl">Enable badges on posters</span></label>
+                        </div>
+
+                        <div class="jt-tab-header" id="ThumbTabHeader" style="display:none;">
+                            <div class="jt-banner" id="ThumbMatchBanner">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                                <span>Thumbnails currently <b>mirror the Poster tab</b>, scaled down by the reduction below.</span>
+                                <span class="spacer"></span>
+                                <button type="button" class="jt-linkbtn" id="ThumbEditIndependently">Edit independently</button>
+                            </div>
+                            <div class="jt-card" style="margin-top:12px;">
+                                <div class="jt-field-row" style="border-top:0; padding-top:0;">
+                                    <label class="jt-switch"><input id="ThumbnailSameAsPoster" type="checkbox" /><span class="track"></span><span class="lbl">Same as Poster</span></label>
+                                    <div id="ThumbSizeReductionWrap" class="jt-slider-field hidden" style="max-width:260px;">
+                                        <div class="jt-slider-head"><span>Size reduction vs. poster</span><span class="val" id="ThumbnailSizeReduction_val">10%</span></div>
+                                        <input id="ThumbnailSizeReduction" type="range" min="0" max="50" step="1" />
+                                    </div>
+                                </div>
+                                <div id="ThumbFieldsContainer" class="hidden">
+                                    <div class="jt-field-row">
+                                        <label class="jt-switch"><input id="ThumbEnabled" type="checkbox" /><span class="track"></span><span class="lbl">Enable badges on thumbnails</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="jt-pagewrap">
+                            <div id="PosterPanels"></div>
+                            <div id="ThumbPanels" style="display:none;"></div>
+                            <div id="ThumbMatchedPlaceholder" style="display:none; padding:60px 0; text-align:center; color:var(--jt-text-faint); font-size:12.5px;">
+                                Badge panels for Poster are being reused here. Turn off &quot;Same as Poster&quot; above to customize Thumbnail independently.
+                            </div>
+
+                            <!-- ===== System pages ===== -->
+                            <section class="jt-system-page" id="SectionLibraries">
+                                <div class="jt-card">
+                                    <div class="jt-card-head"><h2>Libraries</h2><span class="hint">Uncheck to skip badge generation</span></div>
+                                    <div class="jt-lib-grid" id="LibraryCheckboxes"><em>Loading libraries...</em></div>
+                                </div>
+                            </section>
+
+                            <section class="jt-system-page" id="SectionBadgeText">
+                                <div class="jt-card">
+                                    <div class="jt-card-head"><h2>Custom badge text</h2><span class="hint">Blank uses the default text</span></div>
+                                    <div class="jt-grid2" id="CustomBadgeTextsGrid"></div>
+                                </div>
+                            </section>
+
+                            <section class="jt-system-page" id="SectionCustomBadges">
+                                <div class="jt-card">
+                                    <div class="jt-card-head"><h2>Custom badges</h2><span class="hint">Click a badge to replace it — SVG, PNG or JPEG</span></div>
+                                    <div id="BadgeGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(112px, 1fr)); gap:10px;"></div>
+                                    <input id="CustomBadgeFile" type="file" accept="image/svg+xml,image/png,image/jpeg" style="display:none;" />
+                                </div>
+                            </section>
+
+                            <section class="jt-system-page" id="SectionPerformance">
+                                <div class="jt-card">
+                                    <div class="jt-card-head"><h2>Output</h2></div>
+                                    <div class="jt-field-row">
+                                        <div class="jt-field"><div class="jt-field-label">Format</div>
+                                            <select id="OutputFormat" class="jt-select"><option value="Jpeg">JPEG</option><option value="WebP">WebP (experimental)</option></select>
+                                        </div>
+                                        <div class="jt-slider-field" id="JpegQualityContainer" style="max-width:220px;">
+                                            <div class="jt-slider-head"><span>JPEG Quality</span><span class="val" id="JpegQuality_val">90</span></div>
+                                            <input id="JpegQuality" type="range" min="1" max="100" step="1" />
+                                        </div>
+                                        <div class="jt-slider-field" id="WebPQualityContainer" style="max-width:220px; display:none;">
+                                            <div class="jt-slider-head"><span>WebP Quality</span><span class="val" id="WebPQuality_val">90</span></div>
+                                            <input id="WebPQuality" type="range" min="1" max="100" step="1" />
+                                        </div>
+                                    </div>
+                                    <div class="jt-sliders-row">
+                                        <div class="jt-slider-field">
+                                            <div class="jt-slider-head"><span>Cache duration</span><span class="val" id="CacheDurationHours_val">24h</span></div>
+                                            <input id="CacheDurationHours" type="range" min="1" max="720" step="1" />
+                                        </div>
+                                    </div>
+                                    <div class="jt-field-row" style="justify-content:space-between;">
+                                        <span class="hint" id="CacheStatsInfo"></span>
+                                        <button id="ClearCache" type="button" class="jt-btn danger">Clear image cache</button>
+                                    </div>
+                                </div>
+                                <div class="jt-card">
+                                    <div class="jt-card-head"><h2>Backup &amp; reset</h2></div>
+                                    <div class="jt-field-row" style="border-top:0; padding-top:0; gap:10px;">
+                                        <button id="ExportConfig" type="button" class="jt-btn">Export config</button>
+                                        <button id="ImportConfigBtn" type="button" class="jt-btn">Import config</button>
+                                        <input id="ImportConfigFile" type="file" accept="application/json,.json" style="display:none;" />
+                                        <span class="spacer" style="flex:1;"></span>
+                                        <button id="ResetAllSettings" type="button" class="jt-btn danger">Reset all settings</button>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- ================= PREVIEW ================= -->
+                <aside class="jt-preview">
+                    <div class="jt-preview-head"><h3><span class="jt-live-dot"></span>Live preview</h3></div>
+                    <div class="preview-search-wrap">
+                        <input id="PreviewSearch" type="text" class="jt-input" style="width:100%;" placeholder="Search for a movie…" />
+                        <div id="PreviewSearchResults" class="preview-search-results"></div>
+                    </div>
+                    <div id="PreviewSelected" class="preview-selected"></div>
+                    <div id="PreviewSpinner" class="preview-spinner">Refreshing preview…</div>
+                    <img id="PreviewPoster" class="preview-img poster" />
+                    <img id="PreviewThumb" class="preview-img thumb" />
+                    <div id="PreviewError" class="preview-error"></div>
+                    <button id="RefreshPreview" type="button" class="jt-btn" style="width:100%; justify-content:center;">Refresh preview</button>
+                    <div class="jt-stat-card">
+                        <div class="jt-stat-row"><span>Cache</span><span class="mono" id="PreviewCacheStat">—</span></div>
+                    </div>
+                </aside>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+        var TagTurboConfig = { pluginUniqueId: 'f4a2e8c1-9b3d-4f7a-b6c5-2d8e1a3f9b04' };
+
+        // ===== Panel definitions =====
+        var PANEL_DEFS = {
+            Res: {
+                title: 'Resolution', sub: '4K, 1080p, 720p and SD badges detected from probed video streams.',
+                badges: [{id:'4K',key:'4k',label:'4K / UHD'},{id:'1080p',key:'1080p',label:'1080p'},{id:'720p',key:'720p',label:'720p'},{id:'SD',key:'sd',label:'SD'}],
+                hasShowMode: true,
+                showModeOptions: [{v:'Highest',l:'Highest only'},{v:'All',l:'All'}]
+            },
+            Hdr: {
+                title: 'HDR & 3D', sub: 'Dynamic range and 3D format badges.',
+                badges: [{id:'Hdr10',key:'hdr10',label:'HDR10'},{id:'Hdr10Plus',key:'hdr10plus',label:'HDR10+'},{id:'DV',key:'dv',label:'Dolby Vision'},{id:'HLG',key:'hlg',label:'HLG'},{id:'GenericHdr',key:'hdr',label:'Generic HDR'},{id:'3D',key:'3d',label:'3D'}],
+                hasShowMode: false
+            },
+            Codec: {
+                title: 'Video Codec', sub: 'Shown for the source video codec, when detected.',
+                badges: [{id:'H264',key:'h264',label:'H.264 / AVC'},{id:'HEVC',key:'hevc',label:'HEVC / H.265'},{id:'AV1',key:'av1',label:'AV1'},{id:'VP9',key:'vp9',label:'VP9'}],
+                hasShowMode: false
+            },
+            Audio: {
+                title: 'Audio', sub: 'Codec and channel-layout badges from the default audio track.',
+                badges: [{id:'Atmos',key:'atmos',label:'Dolby Atmos'},{id:'DtsX',key:'dtsx',label:'DTS:X'},{id:'TrueHD',key:'truehd',label:'Dolby TrueHD'},{id:'DtsHdMa',key:'dtshdma',label:'DTS-HD MA'},{id:'Channel',key:'channel',label:'Channel Layout (7.1/5.1/Stereo)'}],
+                hasShowMode: true,
+                showModeOptions: [{v:'Highest',l:'Highest only'},{v:'All',l:'All'}]
+            },
+            Source: {
+                title: 'Source', sub: 'Disc origin — folder tags or a plain .disc marker file.',
+                badges: [{id:'Dvd',key:'dvd',label:'DVD'},{id:'Bluray',key:'bluray',label:'Blu-ray'}],
+                hasShowMode: false
+            },
+            FileType: {
+                title: 'File Type', sub: 'Flags items backed by a .strm pointer, even before the stream is probed.',
+                badges: [{id:'Strm',key:'strm',label:'STRM'}],
+                hasShowMode: false
+            }
+        };
+        var RAIL_ORDER = ['Res','Hdr','Codec','Audio','Source','FileType','Lang'];
+        var RAIL_ICONS = {
+            Res: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V4h4"/><path d="M21 8V4h-4"/><path d="M3 16v4h4"/><path d="M21 16v4h-4"/></svg>',
+            Hdr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>',
+            Codec: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg>',
+            Audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 15V9"/><path d="M10 18V6"/><path d="M15 15V9"/><path d="M20 12V12"/></svg>',
+            Source: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>',
+            FileType: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></svg>',
+            Lang: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.5 2.3 2.5 15 0 17"/><path d="M12 3.5c-2.5 2.3-2.5 15 0 17"/></svg>'
+        };
+        var RAIL_LABELS = { Res:'Resolution', Hdr:'HDR & 3D', Codec:'Video Codec', Audio:'Audio', Source:'Source', FileType:'File Type', Lang:'Language' };
+        var RAIL_SYSTEM_ITEMS = [
+            { id:'Libraries', label:'Libraries', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg>' },
+            { id:'BadgeText', label:'Badge text', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>' },
+            { id:'CustomBadges', label:'Custom badges', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>' },
+            { id:'Performance', label:'Performance & cache', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h13"/><circle cx="15" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="7" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="17" cy="18" r="2" fill="currentColor" stroke="none"/></svg>' }
+        ];
+
+        // ===== Field widget helpers (all persist to a real hidden <select>, so no data-layer changes) =====
+        function fieldPosition(id) {
+            var corners = ['TopLeft','TopRight','BottomLeft','BottomRight'];
+            var h = '<select id="' + id + '" class="jt-hidden-field">' + corners.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('') + '</select>';
+            h += '<div class="jt-corner-picker" data-target="' + id + '">';
+            corners.forEach(function(c){ h += '<button type="button" data-val="' + c + '" title="' + c.replace(/([A-Z])/g,' $1').trim() + '"></button>'; });
+            h += '</div>';
+            return h;
+        }
+        function fieldSegmented(id, opts) {
+            var norm = opts.map(function(o){ return typeof o === 'string' ? {v:o,l:o} : o; });
+            var h = '<select id="' + id + '" class="jt-hidden-field">' + norm.map(function(o){return '<option value="'+o.v+'">'+o.l+'</option>';}).join('') + '</select>';
+            h += '<div class="jt-segmented" data-target="' + id + '">';
+            norm.forEach(function(o){ h += '<button type="button" data-val="' + o.v + '">' + o.l + '</button>'; });
+            h += '</div>';
+            return h;
+        }
+        function fieldSlider(id, label, min, max, step, unit) {
+            return '<div class="jt-slider-field"><div class="jt-slider-head"><span>' + label + '</span><span class="val" id="' + id + '_val">--</span></div>' +
+                '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="' + step + '" data-unit="' + (unit||'') + '" /></div>';
+        }
+        function chip(id, label) {
+            var initials = label.replace(/[^A-Za-z0-9]/g,'').slice(0,2).toUpperCase() || '•';
+            return '<label class="jt-chip" for="' + id + '"><input type="checkbox" id="' + id + '" /><span class="dot">' + initials + '</span>' + label + '</label>';
+        }
+        function toggleSwitch(id, label) {
+            return '<label class="jt-switch"><input type="checkbox" id="' + id + '" /><span class="track"></span><span class="lbl">' + label + '</span></label>';
+        }
+        function colorAlpha(idColor, idOpacity, label) {
+            return '<div class="jt-field"><div class="jt-field-label">' + label + '</div><div class="jt-color-field">' +
+                '<div class="jt-swatch-input"><input id="' + idColor + '" type="color" value="#000000" /></div>' +
+                '<input id="' + idOpacity + '" class="jt-input-num" type="number" min="0" max="255" step="1" placeholder="Opacity" /></div></div>';
+        }
+        function colorOnly(id, label) {
+            return '<div class="jt-field"><div class="jt-field-label">' + label + '</div>' +
+                '<div class="jt-swatch-input"><input id="' + id + '" type="color" value="#FFFFFF" /></div></div>';
+        }
+
+        var arrowsSeq = 0;
+        function arrowBtns() {
+            return '<div class="jt-order-arrows">' +
+                '<button type="button" class="panel-move-up" title="Move up" onclick="movePanelUp(this)">&#9650;</button>' +
+                '<button type="button" class="panel-move-down" title="Move down" onclick="movePanelDown(this)">&#9660;</button>' +
+                '</div>';
+        }
+
+        // ===== HTML generation =====
+        function panelHTML(p, panelId) {
+            var def = PANEL_DEFS[panelId];
+            var k = p + panelId;
+            var h = '<section class="jt-page" data-panel-id="' + panelId + '">';
+            h += '<div class="jt-card"><div class="jt-card-head"><h2>Panel' + arrowBtns() + '</h2>' + toggleSwitch(k + 'Enabled', 'Enabled') + '</div>';
+            h += '<div id="' + k + 'Settings">';
+            h += '<div class="jt-field-row">';
+            h += '<div class="jt-field"><div class="jt-field-label">Corner</div>' + fieldPosition(k + 'Position') + '</div>';
+            if (def.hasShowMode) {
+                h += '<div class="jt-field" id="' + k + 'ShowModeWrap"><div class="jt-field-label">Show</div>' + fieldSegmented(k + 'ShowMode', def.showModeOptions) + '</div>';
+            }
+            h += '<div class="jt-field" id="' + k + 'LayoutWrap"><div class="jt-field-label">Layout</div>' + fieldSegmented(k + 'Layout', ['Vertical','Horizontal']) + '</div>';
+            h += '<div class="jt-field"><div class="jt-field-label">Style</div>' + fieldSegmented(k + 'Style', ['Image','Text']) + '</div>';
+            h += '</div>';
+            h += '<div class="jt-sliders-row">';
+            h += fieldSlider(k + 'Size', 'Badge size', 0, 100, 1, '%');
+            h += fieldSlider(k + 'Margin', 'Margin', 0, 20, 0.5, '%');
+            h += '<div id="' + k + 'GapWrap" style="flex:1; min-width:150px;">' + fieldSlider(k + 'Gap', 'Gap between badges', 0, 50, 1, '%') + '</div>';
+            h += '</div>';
+            h += '</div>'; // Settings
+
+            h += '<div class="jt-card-head" style="margin-top:6px;"><h2>Badges</h2><span class="hint">Tap to toggle</span></div>';
+            h += '<div class="jt-chip-grid">';
+            def.badges.forEach(function(b) { h += chip(k + b.id, b.label); });
+            h += '</div>';
+
+            h += '<div id="' + k + 'TextSettings" class="jt-card hidden" style="margin-top:12px;">';
+            h += '<div class="jt-card-head"><h2>Text appearance</h2>';
+            h += '<select id="' + k + 'BadgeSel" class="jt-select"><option value="__global__">Global (all)</option>';
+            def.badges.forEach(function(b) { h += '<option value="' + b.key + '">' + b.label + '</option>'; });
+            h += '</select></div>';
+            h += '<div class="jt-field-row" style="border-top:0;">' + colorAlpha(k + 'BgColor', k + 'BgOpacity', 'Background') + colorOnly(k + 'TextColor', 'Text colour') + '</div>';
+            h += '<div class="jt-sliders-row">' + fieldSlider(k + 'CornerRadius', 'Corner radius', 0, 50, 1, '%') + '</div>';
+            h += '</div>';
+
+            h += '</div></section>';
+            return h;
+        }
+
+        function langPanelHTML(p) {
+            var k = p + 'Lang';
+            var h = '<section class="jt-page" data-panel-id="Lang">';
+            h += '<div class="jt-card"><div class="jt-card-head"><h2>Panel' + arrowBtns() + '</h2>' + toggleSwitch(k + 'Enabled', 'Enabled') + '</div>';
+            h += '<div id="' + k + 'Settings">';
+            h += '<div class="jt-field-row">';
+            h += '<div class="jt-field"><div class="jt-field-label">Corner</div>' + fieldPosition(k + 'Position') + '</div>';
+            h += '<div class="jt-field"><div class="jt-field-label">Show</div>' + fieldSegmented(k + 'ShowMode', [{v:'All',l:'All'},{v:'Highest',l:'Default only'}]) + '</div>';
+            h += '<div class="jt-field" id="' + k + 'LayoutWrap"><div class="jt-field-label">Layout</div>' + fieldSegmented(k + 'Layout', ['Vertical','Horizontal']) + '</div>';
+            h += '<div class="jt-field"><div class="jt-field-label">Style</div>' + fieldSegmented(k + 'Style', ['Image','Text']) + '</div>';
+            h += '</div>';
+            h += '<div class="jt-sliders-row" id="' + k + 'GapWrap">';
+            h += fieldSlider(k + 'Size', 'Badge size', 0, 100, 1, '%');
+            h += fieldSlider(k + 'Margin', 'Margin', 0, 20, 0.5, '%');
+            h += fieldSlider(k + 'Gap', 'Gap between badges', 0, 50, 1, '%');
+            h += '</div>';
+            h += '</div>';
+
+            h += '<div id="' + k + 'TextSettings" class="jt-card hidden" style="margin-top:12px;">';
+            h += '<div class="jt-card-head"><h2>Text appearance</h2></div>';
+            h += '<div class="jt-field-row" style="border-top:0;">' + colorAlpha(k + 'BgColor', k + 'BgOpacity', 'Background') + colorOnly(k + 'TextColor', 'Text colour') + '</div>';
+            h += '<div class="jt-sliders-row">' + fieldSlider(k + 'CornerRadius', 'Corner radius', 0, 50, 1, '%') + '</div>';
+            h += '</div>';
+
+            h += '<div class="jt-card" style="margin-top:12px;">';
+            h += '<div class="jt-card-head"><h2>VOST indicator</h2>' + toggleSwitch(k + 'Vost', 'Show VOST*') + '</div>';
+            h += '<div class="hint" style="margin-bottom:8px;">Shown for languages that have subtitles but no matching audio track.</div>';
+            h += '<div id="' + k + 'VostSettings" class="hidden">';
+            h += '<div class="jt-field-row" style="border-top:0;">' + colorAlpha(k + 'VostBgColor', k + 'VostBgOpacity', 'Background') + colorOnly(k + 'VostTextColor', 'Text colour') + '</div>';
+            h += '<div class="jt-sliders-row">' + fieldSlider(k + 'VostCornerRadius', 'Corner radius', 0, 50, 1, '%') + '</div>';
+            h += '</div></div>';
+
+            h += '</div></section>';
+            return h;
+        }
+
+        function generatePanels(prefix) {
+            return panelHTML(prefix, 'Res') + panelHTML(prefix, 'Hdr') + panelHTML(prefix, 'Codec') + panelHTML(prefix, 'Audio') + panelHTML(prefix, 'Source') + panelHTML(prefix, 'FileType') + langPanelHTML(prefix);
+        }
+
+        // ===== Reorder (unchanged mechanics; operates on section[data-panel-id] siblings) =====
+        function movePanelUp(btn) {
+            var panel = btn.closest('.jt-page');
+            var prev = panel.previousElementSibling;
+            if (prev && prev.classList.contains('jt-page')) { panel.parentNode.insertBefore(panel, prev); updateArrowStates(panel.parentNode); renderRail(); }
+        }
+        function movePanelDown(btn) {
+            var panel = btn.closest('.jt-page');
+            var next = panel.nextElementSibling;
+            if (next && next.classList.contains('jt-page')) { panel.parentNode.insertBefore(next, panel); updateArrowStates(panel.parentNode); renderRail(); }
+        }
+        function updateArrowStates(container) {
+            var panels = container.querySelectorAll(':scope > .jt-page');
+            panels.forEach(function(p, i) {
+                var up = p.querySelector('.panel-move-up'); var down = p.querySelector('.panel-move-down');
+                if (up) up.disabled = (i === 0);
+                if (down) down.disabled = (i === panels.length - 1);
+            });
+        }
+        function sortPanelsByOrder(container, orderMap) {
+            var panels = Array.from(container.querySelectorAll(':scope > .jt-page'));
+            panels.sort(function(a, b) { return (orderMap[a.getAttribute('data-panel-id')] || 0) - (orderMap[b.getAttribute('data-panel-id')] || 0); });
+            panels.forEach(function(p) { container.appendChild(p); });
+            updateArrowStates(container);
+        }
+        function getPanelOrder(container) {
+            var order = {};
+            container.querySelectorAll(':scope > .jt-page').forEach(function(p, i) { order[p.getAttribute('data-panel-id')] = i; });
+            return order;
+        }
+
+        // ===== Override state management (unchanged) =====
+        var overrideStates = {};
+        function initOverrides(key, globalVals, typeOverrides) {
+            var s = { current: '__global__', values: {} };
+            s.values['__global__'] = {
+                bgColor: globalVals.TextBgColor || '#000000',
+                bgOpacity: globalVals.TextBgOpacity != null ? globalVals.TextBgOpacity : 180,
+                textColor: globalVals.TextColor || '#FFFFFF',
+                cornerRadius: globalVals.TextCornerRadius != null ? globalVals.TextCornerRadius : 25
+            };
+            (typeOverrides || []).forEach(function(o) {
+                var bk = o.BadgeKey || o.badgeKey;
+                if (bk) {
+                    s.values[bk] = {
+                        bgColor: o.BgColor || o.bgColor || null,
+                        bgOpacity: o.BgOpacity != null ? o.BgOpacity : (o.bgOpacity != null ? o.bgOpacity : null),
+                        textColor: o.TextColor || o.textColor || null,
+                        cornerRadius: o.CornerRadius != null ? o.CornerRadius : (o.cornerRadius != null ? o.cornerRadius : null)
+                    };
+                }
+            });
+            overrideStates[key] = s;
+        }
+        function saveCurrentOverride(key) {
+            var s = overrideStates[key]; if (!s) return;
+            var bgc = document.querySelector('#' + key + 'BgColor');
+            if (!bgc) return;
+            var vals = {
+                bgColor: bgc.value,
+                bgOpacity: parseInt(document.querySelector('#' + key + 'BgOpacity').value, 10),
+                textColor: document.querySelector('#' + key + 'TextColor').value,
+                cornerRadius: parseInt(document.querySelector('#' + key + 'CornerRadius').value, 10)
+            };
+            if (s.current === '__global__') { s.values['__global__'] = vals; }
+            else {
+                var g = s.values['__global__'];
+                if (vals.bgColor !== g.bgColor || vals.bgOpacity !== g.bgOpacity || vals.textColor !== g.textColor || vals.cornerRadius !== g.cornerRadius) { s.values[s.current] = vals; }
+                else { delete s.values[s.current]; }
+            }
+        }
+        function loadOverrideValues(key, badgeKey) {
+            var s = overrideStates[key]; if (!s) return;
+            saveCurrentOverride(key);
+            s.current = badgeKey;
+            var v = s.values[badgeKey] || s.values['__global__'];
+            document.querySelector('#' + key + 'BgColor').value = v.bgColor || '#000000';
+            document.querySelector('#' + key + 'BgOpacity').value = v.bgOpacity != null ? v.bgOpacity : 180;
+            document.querySelector('#' + key + 'TextColor').value = v.textColor || '#FFFFFF';
+            document.querySelector('#' + key + 'CornerRadius').value = v.cornerRadius != null ? v.cornerRadius : 25;
+            syncCustomUI(document.querySelector('#' + key + 'CornerRadius').closest('.jt-card'));
+        }
+        function collectOverrides(key) {
+            saveCurrentOverride(key);
+            var s = overrideStates[key]; if (!s) return { textBgColor: '#000000', textBgOpacity: 180, textColor: '#FFFFFF', textCornerRadius: 25, overrides: [] };
+            var g = s.values['__global__'];
+            var ov = [];
+            Object.keys(s.values).forEach(function(bk) {
+                if (bk === '__global__') return;
+                var v = s.values[bk];
+                ov.push({ BadgeKey: bk, BgColor: v.bgColor, BgOpacity: v.bgOpacity, TextColor: v.textColor, CornerRadius: v.cornerRadius });
+            });
+            return { textBgColor: g.bgColor, textBgOpacity: g.bgOpacity, textColor: g.textColor, textCornerRadius: g.cornerRadius, overrides: ov };
+        }
+
+        // ===== Show/hide toggles (unchanged logic; operate on the same hidden-field IDs) =====
+        function setupStyleToggle(key) {
+            var styleEl = document.querySelector('#' + key + 'Style');
+            var textDiv = document.querySelector('#' + key + 'TextSettings');
+            if (!styleEl || !textDiv) return;
+            function toggle() { styleEl.value === 'Text' ? textDiv.classList.remove('hidden') : textDiv.classList.add('hidden'); }
+            styleEl.addEventListener('change', toggle);
+            toggle();
+        }
+        function setupEnableToggle(key) {
+            var enEl = document.querySelector('#' + key + 'Enabled');
+            var setDiv = document.querySelector('#' + key + 'Settings');
+            if (!enEl || !setDiv) return;
+            function toggle() { enEl.checked ? setDiv.classList.remove('hidden') : setDiv.classList.add('hidden'); }
+            enEl.addEventListener('change', toggle);
+            toggle();
+        }
+        function setupBadgeSelToggle(key) {
+            var selEl = document.querySelector('#' + key + 'BadgeSel');
+            if (!selEl) return;
+            selEl.addEventListener('change', function() { loadOverrideValues(key, selEl.value); });
+        }
+        function setupLangShowModeToggle(prefix) {
+            var k = prefix + 'Lang';
+            var showEl = document.querySelector('#' + k + 'ShowMode');
+            var layoutWrap = document.querySelector('#' + k + 'LayoutWrap');
+            var gapWrap = document.querySelector('#' + k + 'GapWrap');
+            if (!showEl) return;
+            function toggle() {
+                var hide = showEl.value === 'Highest';
+                if (layoutWrap) layoutWrap.classList.toggle('hidden', hide);
+                if (gapWrap) gapWrap.classList.toggle('hidden', hide);
+            }
+            showEl.addEventListener('change', toggle);
+            toggle();
+        }
+        function setupVostToggle(prefix) {
+            var k = prefix + 'Lang';
+            var vostEl = document.querySelector('#' + k + 'Vost');
+            var vostDiv = document.querySelector('#' + k + 'VostSettings');
+            if (!vostEl || !vostDiv) return;
+            function toggle() { vostEl.checked ? vostDiv.classList.remove('hidden') : vostDiv.classList.add('hidden'); }
+            vostEl.addEventListener('change', toggle);
+            toggle();
+        }
+        function setupHdrCodecShowMode(prefix) {
+            var resEn = document.querySelector('#' + prefix + 'ResEnabled');
+            var resShow = document.querySelector('#' + prefix + 'ResShowMode');
+            if (!resEn || !resShow) return;
+            function update() {
+                var mode = resEn.checked ? resShow.value : 'All';
+                ['Hdr', 'Codec'].forEach(function(pid) {
+                    var el = document.querySelector('#' + prefix + pid + 'ShowMode');
+                    if (el) el.value = mode;
+                });
+            }
+            resEn.addEventListener('change', update);
+            resShow.addEventListener('change', update);
+        }
+        function setupThumbShowHideLayout(prefix) {
+            if (prefix !== 'Thumb') return;
+            ['Res', 'Hdr', 'Codec'].forEach(function(pid) {
+                var showEl = document.querySelector('#' + prefix + pid + 'ShowMode');
+                if (!showEl && pid !== 'Res') return;
+                var effectiveShow = function() {
+                    if (pid === 'Res') return document.querySelector('#' + prefix + 'ResShowMode').value;
+                    var resEn = document.querySelector('#' + prefix + 'ResEnabled');
+                    var resShow = document.querySelector('#' + prefix + 'ResShowMode');
+                    return (resEn && resEn.checked) ? resShow.value : 'All';
+                };
+                function toggle() {
+                    var hide = effectiveShow() === 'Highest';
+                    var lw = document.querySelector('#' + prefix + pid + 'LayoutWrap');
+                    var gw = document.querySelector('#' + prefix + pid + 'GapWrap');
+                    if (lw) lw.classList.toggle('hidden', hide);
+                    if (gw) gw.classList.toggle('hidden', hide);
+                }
+                var resShowEl = document.querySelector('#' + prefix + 'ResShowMode');
+                var resEnEl = document.querySelector('#' + prefix + 'ResEnabled');
+                if (resShowEl) resShowEl.addEventListener('change', toggle);
+                if (resEnEl) resEnEl.addEventListener('change', toggle);
+                toggle();
+            });
+        }
+        function setupAllToggles(prefix) {
+            ['Res', 'Hdr', 'Codec', 'Audio', 'Source', 'FileType'].forEach(function(pid) {
+                setupEnableToggle(prefix + pid);
+                setupStyleToggle(prefix + pid);
+                setupBadgeSelToggle(prefix + pid);
+            });
+            setupEnableToggle(prefix + 'Lang');
+            setupStyleToggle(prefix + 'Lang');
+            setupLangShowModeToggle(prefix);
+            setupVostToggle(prefix);
+            setupHdrCodecShowMode(prefix);
+            setupThumbShowHideLayout(prefix);
+        }
+
+        // ===== Custom widget <-> hidden field sync (new) =====
+        function syncCustomUI(root) {
+            root = root || document;
+            root.querySelectorAll('.jt-corner-picker, .jt-segmented').forEach(function(wrap) {
+                var sel = document.getElementById(wrap.dataset.target);
+                if (!sel) return;
+                wrap.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b.dataset.val === sel.value); });
+            });
+            root.querySelectorAll('input[type="range"]').forEach(function(r) {
+                var out = document.getElementById(r.id + '_val');
+                if (out) out.textContent = r.value + (r.dataset.unit || '');
+            });
+        }
+        document.addEventListener('click', function(e) {
+            var segBtn = e.target.closest('.jt-segmented button, .jt-corner-picker button');
+            if (segBtn) {
+                var wrap = segBtn.parentElement;
+                var sel = document.getElementById(wrap.dataset.target);
+                if (!sel) return;
+                sel.value = segBtn.dataset.val;
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                sel.dispatchEvent(new Event('input', { bubbles: true }));
+                wrap.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b === segBtn); });
+                return;
+            }
+            var valSpan = e.target.closest('.jt-slider-head .val');
+            if (valSpan && !valSpan.querySelector('input')) { beginValueEdit(valSpan); }
+        });
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('input[type="range"]')) {
+                var out = document.getElementById(e.target.id + '_val');
+                if (out && !out.querySelector('input')) out.textContent = e.target.value + (e.target.dataset.unit || '');
+            }
+        });
+
+        // Click a slider's value to type an exact number instead of dragging
+        function beginValueEdit(valSpan) {
+            var range = document.getElementById(valSpan.id.replace(/_val$/, ''));
+            if (!range) return;
+            var unit = range.dataset.unit || '';
+            var editor = document.createElement('input');
+            editor.type = 'number';
+            editor.className = 'jt-val-edit';
+            editor.value = range.value;
+            if (range.min !== '') editor.min = range.min;
+            if (range.max !== '') editor.max = range.max;
+            editor.step = range.step || 1;
+            valSpan.textContent = '';
+            valSpan.appendChild(editor);
+            editor.focus();
+            editor.select();
+
+            var committed = false;
+            function commit() {
+                if (committed) return;
+                committed = true;
+                var v = parseFloat(editor.value);
+                if (isNaN(v)) v = parseFloat(range.value);
+                if (range.min !== '') v = Math.max(parseFloat(range.min), v);
+                if (range.max !== '') v = Math.min(parseFloat(range.max), v);
+                range.value = v;
+                valSpan.textContent = range.value + unit;
+                range.dispatchEvent(new Event('input', { bubbles: true }));
+                range.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            function cancel() {
+                if (committed) return;
+                committed = true;
+                valSpan.textContent = range.value + unit;
+            }
+            editor.addEventListener('blur', commit);
+            editor.addEventListener('keydown', function(ev) {
+                if (ev.key === 'Enter') { ev.preventDefault(); editor.blur(); }
+                else if (ev.key === 'Escape') { ev.preventDefault(); editor.removeEventListener('blur', commit); cancel(); }
+            });
+            editor.addEventListener('click', function(ev) { ev.stopPropagation(); });
+        }
+
+        // ===== Config loading =====
+        function q(id) { return document.querySelector('#' + id); }
+
+        function loadPanelConfig(prefix, panelId, pc) {
+            if (!pc) return;
+            var k = prefix + panelId;
+            q(k + 'Enabled').checked = pc.Enabled !== false;
+            q(k + 'Position').value = pc.Position || 'TopLeft';
+            if (pc.ShowMode && q(k + 'ShowMode')) q(k + 'ShowMode').value = pc.ShowMode;
+            q(k + 'Layout').value = pc.Layout || 'Vertical';
+            q(k + 'Gap').value = pc.GapPercent != null ? pc.GapPercent : 10;
+            q(k + 'Size').value = pc.SizePercent != null ? pc.SizePercent : 15;
+            q(k + 'Margin').value = pc.MarginPercent != null ? pc.MarginPercent : 2.5;
+            q(k + 'Style').value = pc.Style || 'Image';
+
+            var en = pc.EnabledBadges || [];
+            var def = PANEL_DEFS[panelId];
+            if (def) {
+                def.badges.forEach(function(b) {
+                    var el = q(k + b.id);
+                    if (el) {
+                        if (b.key === 'channel') { el.checked = en.indexOf('7.1') >= 0 || en.indexOf('5.1') >= 0 || en.indexOf('stereo') >= 0; }
+                        else { el.checked = en.indexOf(b.key) >= 0; }
+                    }
+                });
+            }
+
+            initOverrides(k, pc, pc.BadgeTypeOverrides || []);
+            var g = overrideStates[k].values['__global__'];
+            q(k + 'BgColor').value = g.bgColor;
+            q(k + 'BgOpacity').value = g.bgOpacity;
+            q(k + 'TextColor').value = g.textColor;
+            q(k + 'CornerRadius').value = g.cornerRadius;
+        }
+
+        function loadLangConfig(prefix, lc, itc) {
+            if (!lc) return;
+            var k = prefix + 'Lang';
+            q(k + 'Enabled').checked = lc.Enabled !== false;
+            q(k + 'Position').value = lc.Position || 'TopLeft';
+            q(k + 'ShowMode').value = lc.ShowMode || 'All';
+            q(k + 'Layout').value = lc.Layout || 'Vertical';
+            q(k + 'Gap').value = lc.GapPercent != null ? lc.GapPercent : 10;
+            q(k + 'Size').value = lc.SizePercent != null ? lc.SizePercent : 15;
+            q(k + 'Margin').value = lc.MarginPercent != null ? lc.MarginPercent : 2.5;
+            q(k + 'Style').value = lc.Style || 'Image';
+            q(k + 'BgColor').value = lc.TextBgColor || '#000000';
+            q(k + 'BgOpacity').value = lc.TextBgOpacity != null ? lc.TextBgOpacity : 180;
+            q(k + 'TextColor').value = lc.TextColor || '#FFFFFF';
+            q(k + 'CornerRadius').value = lc.TextCornerRadius != null ? lc.TextCornerRadius : 25;
+            q(k + 'Vost').checked = itc.ShowVostIndicator !== false;
+            q(k + 'VostBgColor').value = itc.VostBgColor || '#000000';
+            q(k + 'VostBgOpacity').value = itc.VostBgOpacity != null ? itc.VostBgOpacity : 0;
+            q(k + 'VostTextColor').value = itc.VostTextColor || '#FFFFFF';
+            q(k + 'VostCornerRadius').value = itc.VostCornerRadius != null ? itc.VostCornerRadius : 1;
+        }
+
+        function loadImageTypeConfig(prefix, itc) {
+            if (!itc) return;
+            q(prefix + 'Enabled').checked = itc.Enabled !== false;
+            loadPanelConfig(prefix, 'Res', itc.ResolutionPanel);
+            loadPanelConfig(prefix, 'Hdr', itc.HdrPanel);
+            loadPanelConfig(prefix, 'Codec', itc.CodecPanel);
+            loadPanelConfig(prefix, 'Audio', itc.AudioPanel);
+            loadPanelConfig(prefix, 'Source', itc.SourcePanel || {});
+            loadPanelConfig(prefix, 'FileType', itc.FileTypePanel || {});
+            loadLangConfig(prefix, itc.LanguagePanel, itc);
+            var orderMap = {
+                Res: (itc.ResolutionPanel || {}).Order || 0,
+                Hdr: (itc.HdrPanel || {}).Order || 0,
+                Codec: (itc.CodecPanel || {}).Order || 0,
+                Audio: (itc.AudioPanel || {}).Order || 0,
+                Source: (itc.SourcePanel || {}).Order || 5,
+                FileType: (itc.FileTypePanel || {}).Order || 6,
+                Lang: (itc.LanguagePanel || {}).Order || 0
+            };
+            var container = document.getElementById(prefix + 'Panels');
+            if (container) sortPanelsByOrder(container, orderMap);
+            syncCustomUI(container);
+        }
+
+        // ===== Config saving =====
+        function collectPanelBadges(prefix, panelId) {
+            var def = PANEL_DEFS[panelId];
+            var k = prefix + panelId;
+            var badges = [];
+            def.badges.forEach(function(b) {
+                var el = q(k + b.id);
+                if (el && el.checked) {
+                    if (b.key === 'channel') { badges.push('7.1'); badges.push('5.1'); badges.push('stereo'); }
+                    else { badges.push(b.key); }
+                }
+            });
+            return badges;
+        }
+        function collectPanelConfig(prefix, panelId, order) {
+            var k = prefix + panelId;
+            var ov = collectOverrides(k);
+            return {
+                Enabled: q(k + 'Enabled').checked,
+                Position: q(k + 'Position').value,
+                ShowMode: q(k + 'ShowMode') ? q(k + 'ShowMode').value : 'Highest',
+                Layout: q(k + 'Layout').value,
+                GapPercent: parseFloat(q(k + 'Gap').value) || 0,
+                SizePercent: parseInt(q(k + 'Size').value, 10) || 15,
+                MarginPercent: parseFloat(q(k + 'Margin').value) || 2.5,
+                Style: q(k + 'Style').value,
+                Order: order,
+                TextBgColor: ov.textBgColor,
+                TextBgOpacity: ov.textBgOpacity,
+                TextColor: ov.textColor,
+                TextCornerRadius: ov.textCornerRadius,
+                EnabledBadges: collectPanelBadges(prefix, panelId),
+                BadgeTypeOverrides: ov.overrides
+            };
+        }
+        function collectLangConfig(prefix) {
+            var k = prefix + 'Lang';
+            var container = document.getElementById(prefix + 'Panels');
+            var order = container ? getPanelOrder(container) : {Lang:4};
+            return {
+                Enabled: q(k + 'Enabled').checked,
+                Position: q(k + 'Position').value,
+                ShowMode: q(k + 'ShowMode').value,
+                Layout: q(k + 'Layout').value,
+                GapPercent: parseFloat(q(k + 'Gap').value) || 0,
+                SizePercent: parseInt(q(k + 'Size').value, 10) || 15,
+                MarginPercent: parseFloat(q(k + 'Margin').value) || 2.5,
+                Style: q(k + 'Style').value,
+                Order: order.Lang != null ? order.Lang : 4,
+                TextBgColor: q(k + 'BgColor').value,
+                TextBgOpacity: parseInt(q(k + 'BgOpacity').value, 10) || 0,
+                TextColor: q(k + 'TextColor').value,
+                TextCornerRadius: parseInt(q(k + 'CornerRadius').value, 10) || 0,
+                EnabledBadges: [],
+                BadgeTypeOverrides: []
+            };
+        }
+        function collectImageTypeConfig(prefix) {
+            var k = prefix + 'Lang';
+            var container = document.getElementById(prefix + 'Panels');
+            var order = container ? getPanelOrder(container) : {Res:0,Hdr:1,Codec:2,Audio:3,Source:5,FileType:6,Lang:4};
+            return {
+                Enabled: q(prefix + 'Enabled').checked,
+                ResolutionPanel: collectPanelConfig(prefix, 'Res', order.Res || 0),
+                HdrPanel: collectPanelConfig(prefix, 'Hdr', order.Hdr || 0),
+                CodecPanel: collectPanelConfig(prefix, 'Codec', order.Codec || 0),
+                AudioPanel: collectPanelConfig(prefix, 'Audio', order.Audio || 0),
+                SourcePanel: collectPanelConfig(prefix, 'Source', order.Source || 5),
+                FileTypePanel: collectPanelConfig(prefix, 'FileType', order.FileType || 6),
+                LanguagePanel: collectLangConfig(prefix),
+                ShowVostIndicator: q(k + 'Vost').checked,
+                VostBgColor: q(k + 'VostBgColor').value || null,
+                VostTextColor: q(k + 'VostTextColor').value || null,
+                VostBgOpacity: parseInt(q(k + 'VostBgOpacity').value, 10) || 0,
+                VostCornerRadius: parseInt(q(k + 'VostCornerRadius').value, 10) || 0
+            };
+        }
+
+        function collectConfigFromForm(config) {
+            config.Enabled = q('Enabled').checked;
+            config.ThumbnailSameAsPoster = q('ThumbnailSameAsPoster').checked;
+            config.ThumbnailSizeReduction = parseInt(q('ThumbnailSizeReduction').value, 10) || 0;
+            config.PosterConfig = collectImageTypeConfig('Poster');
+            config.ThumbnailConfig = collectImageTypeConfig('Thumb');
+            config.ExcludedLibraryIds = collectExcludedLibraries();
+
+            config.PosterSettings = null; config.ThumbnailSettings = null; config.BackdropSettings = null;
+            config.Show4K = null; config.Show1080p = null; config.Show720p = null; config.ShowSD = null;
+            config.ShowHdr10 = null; config.ShowHdr10Plus = null; config.ShowDolbyVision = null;
+            config.ShowHlg = null; config.ShowGenericHdr = null; config.Show3D = null;
+            config.ShowH264 = null; config.ShowHevc = null; config.ShowAv1 = null; config.ShowVp9 = null;
+            config.ShowDolbyAtmos = null; config.ShowDtsX = null; config.ShowTrueHD = null;
+            config.ShowDtsHdMa = null; config.ShowChannelBadge = null;
+            config.LanguageBadgeMode = null; config.ShowSubtitleIndicator = null;
+
+            var saveCbt = [];
+            document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]').forEach(function(el) {
+                var val = el.value.trim();
+                if (val) saveCbt.push({ Key: el.getAttribute('data-badge-key'), Text: val });
+            });
+            config.CustomBadgeTexts = saveCbt;
+
+            config.CacheDurationHours = parseInt(q('CacheDurationHours').value, 10);
+            config.OutputFormat = q('OutputFormat').value;
+            config.JpegQuality = parseInt(q('JpegQuality').value, 10);
+            config.WebPQuality = parseInt(q('WebPQuality').value, 10);
+            return config;
+        }
+
+        // ===== Utility =====
+        function toggleOutputQuality() {
+            var fmt = q('OutputFormat').value;
+            document.querySelector('#JpegQualityContainer').style.display = fmt === 'Jpeg' ? '' : 'none';
+            document.querySelector('#WebPQualityContainer').style.display = fmt === 'WebP' ? '' : 'none';
+        }
+        function toggleThumbSameAsPoster() {
+            var same = q('ThumbnailSameAsPoster').checked;
+            var c = document.querySelector('#ThumbFieldsContainer');
+            if (c) c.classList.toggle('hidden', same);
+            var r = document.querySelector('#ThumbSizeReductionWrap');
+            if (r) r.classList.toggle('hidden', !same);
+            var banner = document.querySelector('#ThumbMatchBanner');
+            if (banner) banner.style.display = same ? 'flex' : 'none';
+            renderRail();
+            showActivePage();
+        }
+
+        // ===== Library filter =====
+        function loadLibraryCheckboxes(excludedIds) {
+            var container = document.querySelector('#LibraryCheckboxes');
+            var token = ApiClient.accessToken();
+            var headers = {}; if (token) headers['Authorization'] = 'MediaBrowser Token="' + token + '"';
+            fetch(ApiClient.getUrl('Library/VirtualFolders'), {headers:headers}).then(function(r){return r.json();}).then(function(folders) {
+                container.innerHTML = '';
+                folders.forEach(function(folder) {
+                    var folderId = folder.ItemId;
+                    var isExcluded = excludedIds.indexOf(folderId) >= 0;
+                    var label = document.createElement('label');
+                    label.className = 'jt-lib-chip';
+                    label.innerHTML = '<input type="checkbox" class="libCheckbox" data-library-id="' + folderId + '"' + (isExcluded ? '' : ' checked') + ' /><span>' + folder.Name + '</span>';
+                    container.appendChild(label);
+                });
+                if (folders.length === 0) container.innerHTML = '<em>No libraries found.</em>';
+            }).catch(function(err) {
+                console.error('[TagTurbo] Failed to load libraries:', err);
+                container.innerHTML = '<em>Failed to load libraries.</em>';
+            });
+        }
+        function collectExcludedLibraries() {
+            var excluded = [];
+            document.querySelectorAll('#LibraryCheckboxes .libCheckbox').forEach(function(cb) {
+                if (!cb.checked) excluded.push(cb.getAttribute('data-library-id'));
+            });
+            return excluded;
+        }
+
+        function loadCustomBadgeTextGrid() {
+            var grid = document.querySelector('#CustomBadgeTextsGrid');
+            grid.innerHTML = '';
+            allBadgeKeys.forEach(function(b) {
+                var safeId = 'cbt_' + b.key.replace(/[^a-zA-Z0-9]/g, '_');
+                var div = document.createElement('div');
+                div.className = 'jt-cbt-item';
+                div.innerHTML = '<label for="' + safeId + '">' + b.label + '</label><input id="' + safeId + '" class="jt-input" data-badge-key="' + b.key + '" type="text" placeholder="' + b.label + '" />';
+                grid.appendChild(div);
+            });
+        }
+
+        // ===== Badge Gallery =====
+        var allBadgeKeys = [
+            {key:'4k',label:'4K'},{key:'1080p',label:'1080p'},{key:'720p',label:'720p'},{key:'sd',label:'SD'},
+            {key:'hdr10',label:'HDR10'},{key:'hdr10plus',label:'HDR10+'},{key:'dv',label:'Dolby Vision'},{key:'hlg',label:'HLG'},
+            {key:'atmos',label:'Atmos'},{key:'dtsx',label:'DTS:X'},{key:'truehd',label:'TrueHD'},{key:'dtshdma',label:'DTS-HD MA'},
+            {key:'5.1',label:'5.1'},{key:'7.1',label:'7.1'},{key:'stereo',label:'Stereo'},
+            {key:'h264',label:'H.264'},{key:'hevc',label:'HEVC'},{key:'av1',label:'AV1'},{key:'vp9',label:'VP9'},{key:'strm',label:'STRM'},
+            {key:'dvd',label:'DVD'},{key:'bluray',label:'Blu-ray'}
+        ];
+
+        function loadBadgeGallery() {
+            var url = ApiClient.getUrl('TagTurbo/CustomBadges');
+            var token = ApiClient.accessToken();
+            var headers = {}; if (token) headers['Authorization'] = 'MediaBrowser Token="' + token + '"';
+            fetch(url, {headers:headers}).then(function(r){return r.json();}).then(function(customList) {
+                var gallery = document.querySelector('#BadgeGallery'); gallery.innerHTML = '';
+                allBadgeKeys.forEach(function(b) {
+                    var isCustom = customList.indexOf(b.key) >= 0;
+                    var card = document.createElement('div'); card.className = 'badge-card' + (isCustom ? ' custom' : '');
+                    card.setAttribute('data-badge-key', b.key);
+                    var img = document.createElement('img');
+                    var previewUrl = ApiClient.getUrl('TagTurbo/BadgePreview/' + b.key);
+                    img.src = previewUrl + '?t=' + Date.now() + (token ? '&api_key=' + token : ''); img.alt = b.label;
+                    card.appendChild(img);
+                    var lbl = document.createElement('div'); lbl.className = 'badge-label';
+                    lbl.textContent = b.label + (isCustom ? ' (custom)' : ''); card.appendChild(lbl);
+                    if (isCustom) {
+                        var resetBtn = document.createElement('button'); resetBtn.className = 'badge-reset';
+                        resetBtn.textContent = '×'; resetBtn.title = 'Reset to default';
+                        resetBtn.addEventListener('click', function(ev) { ev.stopPropagation();
+                            if (confirm('Reset "' + b.label + '" badge to default?')) {
+                                Dashboard.showLoadingMsg();
+                                ApiClient.ajax({type:'DELETE',url:ApiClient.getUrl('TagTurbo/CustomBadge/'+b.key)}).then(function(){Dashboard.hideLoadingMsg();loadBadgeGallery();});
+                            }
+                        }); card.appendChild(resetBtn);
+                    }
+                    card.addEventListener('click', function() {
+                        var fi = document.querySelector('#CustomBadgeFile'); fi.setAttribute('data-target-key', b.key); fi.click();
+                    });
+                    gallery.appendChild(card);
+                });
+            }).catch(function(err) { console.error('[TagTurbo] Badge gallery error:', err); });
+        }
+
+        function loadCacheStats() {
+            var url = ApiClient.getUrl('TagTurbo/CacheStats');
+            var token = ApiClient.accessToken(); var headers = {};
+            if (token) headers['Authorization'] = 'MediaBrowser Token="' + token + '"';
+            fetch(url, {headers:headers}).then(function(r){return r.json();}).then(function(stats) {
+                var el = document.querySelector('#CacheStatsInfo');
+                var rail = document.querySelector('#RailCacheStat');
+                var prev = document.querySelector('#PreviewCacheStat');
+                var text;
+                if (stats.FileCount > 0) {
+                    var oldest = stats.OldestEntry ? new Date(stats.OldestEntry).toLocaleString() : 'N/A';
+                    text = stats.FileCount + ' files · ' + stats.TotalSizeMB + ' MB';
+                    el.textContent = text + ' | oldest: ' + oldest;
+                } else { text = '0 files'; el.textContent = 'Cache is empty.'; }
+                if (rail) rail.textContent = text;
+                if (prev) prev.textContent = text;
+            }).catch(function(){document.querySelector('#CacheStatsInfo').textContent='';});
+        }
+
+        // ===== Rail / tab navigation =====
+        var activeTab = 'Poster';
+        var activeGroup = 'badge'; // 'badge' | 'system'
+        var activeBadge = 'Res';
+        var activeSystem = 'Libraries';
+
+        function renderRail() {
+            var container = document.getElementById(activeTab + 'Panels');
+            var order = RAIL_ORDER;
+            if (container) {
+                var domOrder = [];
+                container.querySelectorAll(':scope > .jt-page').forEach(function(p){ domOrder.push(p.getAttribute('data-panel-id')); });
+                if (domOrder.length) order = domOrder;
+            }
+
+            var railBadges = document.getElementById('RailBadges');
+            railBadges.innerHTML = order.map(function(id) {
+                var active = (activeGroup === 'badge' && activeBadge === id) ? ' active' : '';
+                return '<li><button type="button" class="jt-nav-item' + active + '" data-badge="' + id + '">' + RAIL_ICONS[id] +
+                    '<span class="lbl">' + RAIL_LABELS[id] + '</span></button></li>';
+            }).join('');
+            railBadges.querySelectorAll('.jt-nav-item').forEach(function(btn) {
+                btn.addEventListener('click', function() { activeGroup = 'badge'; activeBadge = btn.dataset.badge; renderRail(); showActivePage(); });
+            });
+
+            var railSystem = document.getElementById('RailSystem');
+            railSystem.innerHTML = RAIL_SYSTEM_ITEMS.map(function(it) {
+                var active = (activeGroup === 'system' && activeSystem === it.id) ? ' active' : '';
+                return '<li><button type="button" class="jt-nav-item' + active + '" data-system="' + it.id + '">' + it.icon + '<span class="lbl">' + it.label + '</span></button></li>';
+            }).join('');
+            railSystem.querySelectorAll('.jt-nav-item').forEach(function(btn) {
+                btn.addEventListener('click', function() { activeGroup = 'system'; activeSystem = btn.dataset.system; showActivePage(); renderRail(); });
+            });
+        }
+
+        function showActivePage() {
+            document.querySelectorAll('.jt-page').forEach(function(p) { p.style.display = 'none'; });
+            document.querySelectorAll('.jt-system-page').forEach(function(p) { p.style.display = 'none'; });
+            document.getElementById('JtTabbar').style.display = activeGroup === 'system' ? 'none' : 'flex';
+            document.getElementById('PosterTabHeader').style.display = (activeGroup !== 'system' && activeTab === 'Poster') ? '' : 'none';
+            document.getElementById('ThumbTabHeader').style.display = (activeGroup !== 'system' && activeTab === 'Thumb') ? '' : 'none';
+
+            var thumbMatched = q('ThumbnailSameAsPoster') ? q('ThumbnailSameAsPoster').checked : false;
+            document.getElementById('PosterPanels').style.display = activeTab === 'Poster' ? 'block' : 'none';
+            document.getElementById('ThumbPanels').style.display = (activeTab === 'Thumb' && !thumbMatched) ? 'block' : 'none';
+            document.getElementById('ThumbMatchedPlaceholder').style.display = (activeTab === 'Thumb' && thumbMatched) ? 'block' : 'none';
+
+            if (activeGroup === 'system') {
+                var sysEl = document.getElementById('Section' + activeSystem);
+                if (sysEl) sysEl.style.display = 'block';
+                document.getElementById('JtPageTitle').textContent = RAIL_SYSTEM_ITEMS.find(function(i){return i.id===activeSystem;}).label;
+                document.getElementById('JtPageSub').textContent = '';
+            } else {
+                var container = document.getElementById(activeTab + 'Panels');
+                var el = container ? container.querySelector('.jt-page[data-panel-id="' + activeBadge + '"]') : null;
+                if (el) el.style.display = 'block';
+                document.getElementById('JtPageTitle').textContent = RAIL_LABELS[activeBadge];
+                document.getElementById('JtPageSub').textContent = activeBadge === 'Lang' ? 'Audio language flags and VOST indicators.' : (PANEL_DEFS[activeBadge] ? PANEL_DEFS[activeBadge].sub : '');
+            }
+        }
+
+        document.getElementById('TabPoster').addEventListener('click', function() { activeTab = 'Poster'; activeGroup = 'badge'; renderRail(); showActivePage(); setTabActive(); });
+        document.getElementById('TabThumb').addEventListener('click', function() { activeTab = 'Thumb'; activeGroup = 'badge'; renderRail(); showActivePage(); setTabActive(); });
+        function setTabActive() {
+            document.getElementById('TabPoster').classList.toggle('active', activeTab === 'Poster');
+            document.getElementById('TabThumb').classList.toggle('active', activeTab === 'Thumb');
+        }
+        document.getElementById('ThumbEditIndependently').addEventListener('click', function() {
+            var el = q('ThumbnailSameAsPoster'); el.checked = false; el.dispatchEvent(new Event('change', {bubbles:true}));
+        });
+
+        // ===== Page Show =====
+        document.querySelector('#TagTurboConfigPage').addEventListener('pageshow', function() {
+            document.getElementById('PosterPanels').innerHTML = generatePanels('Poster');
+            document.getElementById('ThumbPanels').innerHTML = generatePanels('Thumb');
+            loadCustomBadgeTextGrid();
+
+            Dashboard.showLoadingMsg();
+            ApiClient.getPluginConfiguration(TagTurboConfig.pluginUniqueId).then(function(config) {
+                q('Enabled').checked = config.Enabled;
+                q('ThumbnailSameAsPoster').checked = config.ThumbnailSameAsPoster === true;
+                q('ThumbnailSizeReduction').value = config.ThumbnailSizeReduction != null ? config.ThumbnailSizeReduction : 10;
+
+                loadImageTypeConfig('Poster', config.PosterConfig || {});
+                loadImageTypeConfig('Thumb', config.ThumbnailConfig || {});
+
+                var cbtInputs = document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]');
+                var cbtList = config.CustomBadgeTexts || [];
+                var cbtMap = {};
+                cbtList.forEach(function(item) { cbtMap[item.Key || item.key] = item.Text || item.text; });
+                cbtInputs.forEach(function(el) { el.value = cbtMap[el.getAttribute('data-badge-key')] || ''; });
+
+                q('CacheDurationHours').value = config.CacheDurationHours;
+                q('OutputFormat').value = config.OutputFormat;
+                q('JpegQuality').value = config.JpegQuality;
+                q('WebPQuality').value = config.WebPQuality;
+                toggleOutputQuality();
+                syncCustomUI(document);
+
+                setupAllToggles('Poster');
+                setupAllToggles('Thumb');
+                q('ThumbnailSameAsPoster').addEventListener('change', toggleThumbSameAsPoster);
+                toggleThumbSameAsPoster();
+
+                loadLibraryCheckboxes(config.ExcludedLibraryIds || []);
+                renderRail();
+                showActivePage();
+                setTabActive();
+                Dashboard.hideLoadingMsg();
+            }).catch(function(err) {
+                console.error('[TagTurbo] Failed to load config:', err);
+                Dashboard.hideLoadingMsg();
+                Dashboard.alert('Failed to load TagTurbo configuration.');
+            });
+
+            loadBadgeGallery();
+            loadCacheStats();
+            toggleOutputQuality();
+        });
+
+        // ===== Form Submit =====
+        document.querySelector('#TagTurboConfigForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            Dashboard.showLoadingMsg();
+            ApiClient.getPluginConfiguration(TagTurboConfig.pluginUniqueId).then(function(config) {
+                collectConfigFromForm(config);
+                ApiClient.updatePluginConfiguration(TagTurboConfig.pluginUniqueId, config).then(function() {
+                    Dashboard.processPluginConfigurationUpdateResult();
+                });
+            });
+            return false;
+        });
+
+        // ===== Other Handlers =====
+        document.querySelector('#ClearCache').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear the image cache?')) {
+                Dashboard.showLoadingMsg();
+                ApiClient.ajax({type:'POST',url:ApiClient.getUrl('TagTurbo/ClearCache')}).then(function(){
+                    Dashboard.hideLoadingMsg(); Dashboard.alert('Cache cleared successfully.'); loadCacheStats();
+                }).catch(function(){Dashboard.hideLoadingMsg();Dashboard.alert('Failed to clear cache.');});
+            }
+        });
+
+        document.querySelector('#CustomBadgeFile').addEventListener('change', function() {
+            var fi = this; var bk = fi.getAttribute('data-target-key');
+            if (!bk || !fi.files || fi.files.length === 0) return;
+            var fd = new FormData(); fd.append('file', fi.files[0]);
+            Dashboard.showLoadingMsg();
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', ApiClient.getUrl('TagTurbo/CustomBadge/' + bk), true);
+            var token = ApiClient.accessToken();
+            if (token) xhr.setRequestHeader('Authorization', 'MediaBrowser Token="' + token + '"');
+            xhr.onload = function(){Dashboard.hideLoadingMsg();fi.value='';if(xhr.status===204){Dashboard.alert('Badge uploaded.');loadBadgeGallery();}else{Dashboard.alert('Upload failed.');}};
+            xhr.onerror = function(){Dashboard.hideLoadingMsg();fi.value='';Dashboard.alert('Upload failed.');};
+            xhr.send(fd);
+        });
+
+        document.querySelector('#ExportConfig').addEventListener('click', function() {
+            window.location = ApiClient.getUrl('TagTurbo/ExportConfig') + '?api_key=' + ApiClient.accessToken();
+        });
+        document.querySelector('#ImportConfigBtn').addEventListener('click', function() { document.querySelector('#ImportConfigFile').click(); });
+        document.querySelector('#ImportConfigFile').addEventListener('change', function() {
+            var fi = this; var file = fi.files[0]; if (!file) return;
+            if (confirm('Import this configuration? Current settings will be overwritten.')) {
+                Dashboard.showLoadingMsg(); var fd = new FormData(); fd.append('file', file);
+                fetch(ApiClient.getUrl('TagTurbo/ImportConfig'), {method:'POST',headers:{'Authorization':'MediaBrowser Token="'+ApiClient.accessToken()+'"'},body:fd}).then(function(r){
+                    Dashboard.hideLoadingMsg();fi.value='';if(r.ok){Dashboard.alert('Configuration imported. Reloading...');window.location.reload();}else{r.text().then(function(t){Dashboard.alert('Import failed: '+t);});}
+                }).catch(function(){Dashboard.hideLoadingMsg();fi.value='';Dashboard.alert('Failed to import configuration.');});
+            } else { fi.value=''; }
+        });
+        document.querySelector('#ResetAllSettings').addEventListener('click', function() {
+            if (confirm('Reset ALL settings to their default values? This cannot be undone.')) {
+                Dashboard.showLoadingMsg();
+                ApiClient.ajax({type:'POST',url:ApiClient.getUrl('TagTurbo/ResetConfig')}).then(function(){
+                    Dashboard.hideLoadingMsg();Dashboard.alert('Settings reset. Reloading...');window.location.reload();
+                }).catch(function(){Dashboard.hideLoadingMsg();Dashboard.alert('Failed to reset settings.');});
+            }
+        });
+
+        var outputFmtEl = document.querySelector('#OutputFormat');
+        outputFmtEl.addEventListener('change', toggleOutputQuality);
+        outputFmtEl.addEventListener('input', toggleOutputQuality);
+
+        // ===== Live Preview =====
+        (function() {
+            var previewItemId=null,previewItemName='',searchTimer=null,refreshTimer=null,refreshing=false;
+            var searchInput=document.querySelector('#PreviewSearch'),searchResults=document.querySelector('#PreviewSearchResults');
+            var selectedEl=document.querySelector('#PreviewSelected'),spinner=document.querySelector('#PreviewSpinner');
+            var posterImg=document.querySelector('#PreviewPoster'),thumbImg=document.querySelector('#PreviewThumb');
+            var errorEl=document.querySelector('#PreviewError'),refreshBtn=document.querySelector('#RefreshPreview');
+            searchInput.addEventListener('input',function(){clearTimeout(searchTimer);var qry=searchInput.value.trim();
+                if(qry.length<2){searchResults.style.display='none';return;}
+                searchTimer=setTimeout(function(){ApiClient.getItems(ApiClient.getCurrentUserId(),{SearchTerm:qry,IncludeItemTypes:'Movie',Limit:8,Recursive:true,Fields:'PrimaryImageAspectRatio'}).then(function(result){
+                    searchResults.innerHTML='';if(!result.Items||result.Items.length===0){searchResults.innerHTML='<div class="preview-search-item" style="color:#aaa;">No results</div>';searchResults.style.display='block';return;}
+                    result.Items.forEach(function(item){var div=document.createElement('div');div.className='preview-search-item';div.textContent=item.Name+(item.ProductionYear?' ('+item.ProductionYear+')':'');
+                        div.addEventListener('click',function(){previewItemId=item.Id;previewItemName=item.Name+(item.ProductionYear?' ('+item.ProductionYear+')':'');selectedEl.textContent=previewItemName;searchResults.style.display='none';searchInput.value='';refreshPreview();});
+                        searchResults.appendChild(div);});searchResults.style.display='block';});},300);});
+            document.addEventListener('click',function(e){if(!searchResults.contains(e.target)&&e.target!==searchInput)searchResults.style.display='none';});
+            function refreshPreview(){if(!previewItemId||refreshing)return;refreshing=true;errorEl.style.display='none';errorEl.textContent='';spinner.style.display='block';
+                ApiClient.getPluginConfiguration(TagTurboConfig.pluginUniqueId).then(function(config){collectConfigFromForm(config);return ApiClient.updatePluginConfiguration(TagTurboConfig.pluginUniqueId,config);}).then(function(){
+                    return ApiClient.ajax({type:'POST',url:ApiClient.getUrl('TagTurbo/ClearCache')});}).then(function(){
+                    var token=ApiClient.accessToken();var bust='_t='+Date.now();var tp=token?'&api_key='+token:'';
+                    var pu=ApiClient.getUrl('Items/'+previewItemId+'/Images/Primary')+'?'+bust+tp;
+                    var tu=ApiClient.getUrl('Items/'+previewItemId+'/Images/Thumb')+'?'+bust+tp;
+                    var pl=new Promise(function(res){var img=new Image();img.onload=function(){posterImg.src=pu;posterImg.style.display='block';res();};img.onerror=function(){posterImg.style.display='none';res();};img.src=pu;});
+                    var tl=new Promise(function(res){var img=new Image();img.onload=function(){thumbImg.src=tu;thumbImg.style.display='block';res();};img.onerror=function(){thumbImg.style.display='none';res();};img.src=tu;});
+                    return Promise.all([pl,tl]);}).then(function(){spinner.style.display='none';refreshing=false;loadCacheStats();}).catch(function(err){spinner.style.display='none';refreshing=false;errorEl.textContent='Preview error: '+(err.message||err);errorEl.style.display='block';});}
+            var form=document.querySelector('#TagTurboConfigForm');
+            form.addEventListener('input',function(e){if(e.target.closest('.jt-preview'))return;clearTimeout(refreshTimer);refreshTimer=setTimeout(refreshPreview,1500);});
+            form.addEventListener('change',function(e){if(e.target.closest('.jt-preview'))return;clearTimeout(refreshTimer);refreshTimer=setTimeout(refreshPreview,1500);});
+            refreshBtn.addEventListener('click',function(){clearTimeout(refreshTimer);refreshPreview();});
+        })();
+        </script>
+    </div>
+</body>
+</html>
