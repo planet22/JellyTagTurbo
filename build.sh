@@ -33,7 +33,7 @@ cat > "$OUTPUT_DIR/meta.json" << 'EOF'
     "owner": "Atilili",
     "category": "General",
     "version": "1.0.0.0",
-    "targetAbi": "10.11.0.0",
+    "targetAbi": "12.0.0.0",
     "timestamp": "2025-01-29T00:00:00Z"
 }
 EOF

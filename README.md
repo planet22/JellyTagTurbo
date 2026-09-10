@@ -107,8 +107,8 @@ TagTurbo intercepts Jellyfin image requests via HTTP middleware, detects media q
 
 ## Requirements
 
-- Jellyfin 10.11.x or later
-- .NET 9.0 runtime (included with Jellyfin 10.11+)
+- Jellyfin 12.0.x or later
+- .NET 10.0 runtime (included with Jellyfin 12.0+)
 
 ## Troubleshooting
 
