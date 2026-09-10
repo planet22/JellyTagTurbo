@@ -225,7 +225,7 @@
                         </div>
 
                         <div class="jt-rail-footer">
-                            <div class="jt-rail-footer-row"><span>Version</span><span class="mono">3.0.0.5</span></div>
+                            <div class="jt-rail-footer-row"><span>Version</span><span class="mono" id="RailVersion">&hellip;</span></div>
                             <div class="jt-rail-footer-row"><span>Cache</span><span class="mono" id="RailCacheStat">—</span></div>
                         </div>
                     </nav>
@@ -1140,6 +1140,17 @@
             }).catch(function(){document.querySelector('#CacheStatsInfo').textContent='';});
         }
 
+        function loadVersion() {
+            ApiClient.getInstalledPlugins().then(function(plugins) {
+                var plugin = plugins.find(function(p) { return p.Id && p.Id.toLowerCase() === TagTurboConfig.pluginUniqueId.toLowerCase(); });
+                var rail = document.querySelector('#RailVersion');
+                if (rail) rail.textContent = plugin && plugin.Version ? plugin.Version : '?';
+            }).catch(function() {
+                var rail = document.querySelector('#RailVersion');
+                if (rail) rail.textContent = '?';
+            });
+        }
+
         // ===== Rail / tab navigation =====
         var activeTab = 'Poster';
         var activeGroup = 'badge'; // 'badge' | 'system'
@@ -1257,6 +1268,7 @@
 
             loadBadgeGallery();
             loadCacheStats();
+            loadVersion();
             toggleOutputQuality();
         });
 
