@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "f4a2e8c1-9b3d-4f7a-b6c5-2d8e1a3f9b04",
+    "name": "TagTurbo",
+    "description": "TagTurbo automatically adds quality resolution badges to your media posters and thumbnails. Badges are visible on all clients including web, mobile, TV, and Kodi. Features automatic quality detection, configurable badge position and size, and image caching for performance.",
+    "overview": "Adds quality badges (4K, 1080p, etc.) to media posters and thumbnails.",
+    "owner": "planet22",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "Initial release. Quality detection for 4K, 1080p, 720p, SD; configurable badge position and size; image caching; HTTP middleware for universal client support.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/planet22/JellyTagTurbo/releases/download/v1.0.0.0/tagturbo_1.0.0.0.zip",
+        "checksum": "147651788143b2334c8fbbcbe757fbc9",
+        "timestamp": "2026-09-11T00:22:46.0000000Z"
+      }
+    ]
+  }
+]
