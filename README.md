@@ -1,5 +1,13 @@
 This is a fork of https://github.com/Atilil/jellyfin-plugins/tree/main/Jellytag
 
+## Differences from the original
+
+- Retargeted to Jellyfin 12.0 / .NET 10 (the original targets Jellyfin 10.11 / .NET 9), under its own plugin identity — namespace, assembly name, and GUID renamed from `JellyTag` to `TagTurbo` so it can be installed alongside the original.
+- Added two badge categories not present upstream: **Source** (DVD/Blu-ray, detected by scanning parent folders for source tags/disc markers) and **File Type** (flags `.strm`-based library entries).
+- The config page's version display now reads the actual running assembly version instead of a hardcoded value, and tolerates different `getInstalledPlugins()` response shapes.
+- Fixed an authentication bug in the badge gallery preview (it returned 401 because the preview route didn't honor the query-string `api_key`) and repackaged the release to include SVG-rendering dependencies (ExCSS, ShimSkiaSharp, Svg.Custom, Svg.Model, Svg.Skia) that were missing from the original packaging.
+- Ships its own Jellyfin plugin repository manifest for one-click catalog installs (see Installation below).
+
 # TagTurbo — Quality Badge Plugin for Jellyfin
 
 TagTurbo automatically overlays quality badges (resolution, HDR, codec, audio, language) on your media posters and thumbnails. Badges are rendered server-side via HTTP middleware, so they appear on **all Jellyfin clients** without any configuration.
@@ -33,7 +41,7 @@ TagTurbo automatically overlays quality badges (resolution, HDR, codec, audio, l
 1. In Jellyfin, go to **Dashboard** → **Plugins** → **Repositories**
 2. Add a new repository with this URL:
    ```
-   https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/manifest.json
+   https://github.com/planet22/JellyTagTurbo/raw/main/manifest.json
    ```
 3. Go to **Catalog**, find **TagTurbo** and install it
 4. Restart Jellyfin
