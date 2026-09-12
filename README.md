@@ -12,10 +12,6 @@ This is a fork of https://github.com/Atilil/jellyfin-plugins/tree/main/Jellytag
 
 TagTurbo automatically overlays quality badges (resolution, HDR, codec, audio, language) on your media posters and thumbnails. Badges are rendered server-side via HTTP middleware, so they appear on **all Jellyfin clients** without any configuration.
 
-<p align="center">
-    <img src="Jellyfin.Plugin.TagTurbo/TagTurbo.png" />
-</p>
-
 ## Features
 
 - **Multi-category badges**: Resolution, HDR, 3D, Video Codec, Audio, Language flags, Source (DVD/Blu-ray), File Type (STRM), and VOST indicator
