@@ -1098,8 +1098,11 @@
                     var card = document.createElement('div'); card.className = 'badge-card' + (isCustom ? ' custom' : '');
                     card.setAttribute('data-badge-key', b.key);
                     var img = document.createElement('img');
-                    var previewUrl = ApiClient.getUrl('TagTurbo/BadgePreview/' + b.key);
-                    img.src = previewUrl + '?t=' + Date.now() + (token ? '&api_key=' + token : ''); img.alt = b.label;
+                    img.alt = b.label;
+                    var previewUrl = ApiClient.getUrl('TagTurbo/BadgePreview/' + b.key) + '?t=' + Date.now();
+                    fetch(previewUrl, {headers:headers}).then(function(r){ return r.ok ? r.blob() : null; }).then(function(blob) {
+                        if (blob) img.src = URL.createObjectURL(blob);
+                    }).catch(function(err) { console.error('[TagTurbo] Badge preview error:', b.key, err); });
                     card.appendChild(img);
                     var lbl = document.createElement('div'); lbl.className = 'badge-label';
                     lbl.textContent = b.label + (isCustom ? ' (custom)' : ''); card.appendChild(lbl);
@@ -1141,11 +1144,16 @@
         }
 
         function loadVersion() {
-            ApiClient.getInstalledPlugins().then(function(plugins) {
-                var plugin = plugins.find(function(p) { return p.Id && p.Id.toLowerCase() === TagTurboConfig.pluginUniqueId.toLowerCase(); });
+            ApiClient.getInstalledPlugins().then(function(resp) {
+                var plugins = Array.isArray(resp) ? resp : (resp && resp.Items) || [];
+                var wantId = TagTurboConfig.pluginUniqueId.toLowerCase();
+                var plugin = plugins.find(function(p) { return p.Id && p.Id.toLowerCase().replace(/-/g, '') === wantId.replace(/-/g, ''); });
+                if (!plugin) plugin = plugins.find(function(p) { return p.Name === 'TagTurbo'; });
                 var rail = document.querySelector('#RailVersion');
                 if (rail) rail.textContent = plugin && plugin.Version ? plugin.Version : '?';
-            }).catch(function() {
+                if (!plugin) console.warn('[TagTurbo] Could not find plugin in getInstalledPlugins() response:', resp);
+            }).catch(function(err) {
+                console.error('[TagTurbo] loadVersion error:', err);
                 var rail = document.querySelector('#RailVersion');
                 if (rail) rail.textContent = '?';
             });
